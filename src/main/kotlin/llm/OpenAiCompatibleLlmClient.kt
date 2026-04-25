@@ -50,7 +50,7 @@ class OpenAiCompatibleLlmClient(
               "messages": [
                 {
                   "role": "system",
-                  "content": "You are a senior test engineer. Suggest likely important test scenarios as concise bullet points."
+                  "content": "You are a senior test engineer. Return only strict JSON that follows the requested schema. Never add markdown or prose outside JSON."
                 },
                 {
                   "role": "user",
@@ -64,7 +64,38 @@ class OpenAiCompatibleLlmClient(
 
     private fun buildPrompt(input: MethodLlmInput): String {
         return """
-            Analyze the Java method and suggest likely missing test scenarios.
+            Analyze the Java method and produce a structured heuristic assessment.
+
+            IMPORTANT RULES:
+            - Do not claim certainty.
+            - Assess heuristically.
+            - Existing tests are represented only by names, not bodies.
+            - Return strict JSON only.
+            - Use exactly the allowed enum values.
+
+            REQUIRED JSON SCHEMA:
+            {
+              "method_summary": "string",
+              "important_behaviors": ["string"],
+              "suggested_scenarios": [
+                {
+                  "scenario": "string",
+                  "category": "happy_path|edge_case|invalid_input|exception_path|state_transition",
+                  "priority": "high|medium|low",
+                  "rationale": "string"
+                }
+              ],
+              "coverage_assessment": {
+                "likely_covered": ["string"],
+                "possibly_covered": ["string"],
+                "likely_missing": ["string"]
+              }
+            }
+
+            COVERAGE GUIDANCE:
+            - Decide likely_covered / possibly_covered / likely_missing by matching scenario intent with existing test names only.
+            - If evidence is weak, prefer possibly_covered.
+            - If no matching test name intent is visible, use likely_missing.
 
             className: ${input.className}
             methodName: ${input.methodName}
@@ -78,11 +109,6 @@ class OpenAiCompatibleLlmClient(
 
             extractedSignals:
             ${input.extractedSignals.joinToString("\n")}
-
-            Return concise bullets grouped by:
-            1) likely covered
-            2) possibly covered
-            3) likely missing
         """.trimIndent()
     }
 
