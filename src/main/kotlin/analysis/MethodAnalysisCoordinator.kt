@@ -4,7 +4,10 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiMethod
 import io.github.trichogaster.discovery.TestDiscoveryService
+import io.github.trichogaster.i18n.TestGapBundle
+import io.github.trichogaster.llm.LlmResponseParseException
 import io.github.trichogaster.llm.LlmSuggestionService
+import io.github.trichogaster.ui.toolwindow.TestGapResultsPanel
 import io.github.trichogaster.ui.toolwindow.TestGapResultsPresenter
 
 object MethodAnalysisCoordinator {
@@ -35,13 +38,18 @@ object MethodAnalysisCoordinator {
         if (!llmSuggestionService.canCallModel()) {
             TestGapResultsPresenter.showStatus(
                 project,
-                "LLM settings are incomplete. Open Settings > Tools > Test Gap Finder and configure API Base URL, API Key, and Model Name."
+                TestGapBundle.message("toolWindow.analysis.error.missingSettings"),
+                TestGapResultsPanel.StatusType.ERROR
             )
 
             return
         }
 
-        TestGapResultsPresenter.showStatus(project, "Running LLM analysis...")
+        TestGapResultsPresenter.showStatus(
+            project,
+            TestGapBundle.message("toolWindow.analysis.status.loading"),
+            TestGapResultsPanel.StatusType.LOADING
+        )
 
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
@@ -66,9 +74,16 @@ object MethodAnalysisCoordinator {
                         return@invokeLater
                     }
 
+                    val message = if (t is LlmResponseParseException) {
+                        TestGapBundle.message("toolWindow.analysis.error.parse")
+                    } else {
+                        TestGapBundle.message("toolWindow.analysis.error.request", t.message ?: t.javaClass.simpleName)
+                    }
+
                     TestGapResultsPresenter.showStatus(
                         project,
-                        "LLM analysis failed: ${t.message ?: t.javaClass.simpleName}"
+                        message,
+                        TestGapResultsPanel.StatusType.ERROR
                     )
                 }
             }
