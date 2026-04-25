@@ -30,7 +30,9 @@ object LlmOutputContract {
                   "title": "string",
                   "category": "happy_path|boundary|invalid_input|exception_path|edge_case",
                   "priority": "high|medium|low",
-                  "rationale": "string"
+                  "rationale": "string",
+                  "confidence": "high|medium|low",
+                  "assumption": "string"
                 }
               ],
               "coverageAssessment": {

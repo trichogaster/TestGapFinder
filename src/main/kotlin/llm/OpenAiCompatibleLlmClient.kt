@@ -71,9 +71,13 @@ class OpenAiCompatibleLlmClient(
             - Assess heuristically.
             - Existing tests are represented only by names, not bodies.
             - Return strict JSON only.
+            - Validation can exist in controller/DTO layers (for example via @Valid) and may not appear in service code.
+            - Do not mark validation scenarios as likely_missing only because service code has no explicit validation.
+            - If upstream validation context is unknown, prefer possibly_covered with a clear assumption.
             - Use exactly these categories: happy_path, boundary, invalid_input, exception_path, edge_case.
             - Use exactly these coverage labels: likely_covered, possibly_covered, likely_missing.
             - Use exactly these priorities: high, medium, low.
+            - Include confidence (high|medium|low) and assumption for each scenario.
 
             REQUIRED JSON SCHEMA:
             ${LlmOutputContract.requiredJsonSchema()}

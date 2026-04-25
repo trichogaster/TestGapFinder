@@ -10,7 +10,9 @@ data class LlmScenario(
     val title: String,
     val category: String,
     val priority: String,
-    val rationale: String
+    val rationale: String,
+    val confidence: String,
+    val assumption: String
 )
 
 data class LlmCoverageAssessment(
