@@ -18,6 +18,11 @@
         <codeInsight.lineMarkerProvider
                 language="JAVA"
                 implementationClass="io.github.trichogaster.gutter.MethodTestGapLineMarkerProvider"/>
+        <applicationConfigurable
+                id="io.github.trichogaster.settings.llm"
+                parentId="tools"
+                displayName="Test Gap Finder"
+                instance="io.github.trichogaster.settings.LlmSettingsConfigurable"/>
         <toolWindow
                 id="Test Gap Finder"
                 anchor="right"
