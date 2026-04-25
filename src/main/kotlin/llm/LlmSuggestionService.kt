@@ -30,7 +30,9 @@ class LlmSuggestionService(
             )
         )
 
-        return LlmResponseParser.parseFromChatCompletionsResponse(rawResponse)
+        return LlmResultNormalizer.normalize(
+            LlmResponseParser.parseFromChatCompletionsResponse(rawResponse)
+        )
     }
 
     companion object {

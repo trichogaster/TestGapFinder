@@ -12,9 +12,13 @@ object LlmResponseParser {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun parseFromChatCompletionsResponse(rawResponse: String): LlmAnalysisResult {
-        val root = json.parseToJsonElement(rawResponse).jsonObject
-        val content = root.extractMessageContent()
-        return parseContractJson(content)
+        try {
+            val root = json.parseToJsonElement(rawResponse).jsonObject
+            val content = root.extractMessageContent()
+            return parseContractJson(content)
+        } catch (t: Throwable) {
+            throw LlmResponseParseException("The model response could not be parsed. Please try again.", t)
+        }
     }
 
     private fun parseContractJson(content: String): LlmAnalysisResult {
@@ -65,7 +69,9 @@ object LlmResponseParser {
             title = obj.requireString("title"),
             category = obj.requireString("category"),
             priority = obj.requireString("priority"),
-            rationale = obj.requireString("rationale")
+            rationale = obj.requireString("rationale"),
+            confidence = obj.optionalString("confidence") ?: "medium",
+            assumption = obj.optionalString("assumption") ?: ""
         )
     }
 
@@ -90,6 +96,11 @@ object LlmResponseParser {
 
     private fun JsonObject.requireString(key: String): String {
         val element = this[key] ?: throw IllegalStateException("Missing JSON string field: $key")
+        return element.asString()
+    }
+
+    private fun JsonObject.optionalString(key: String): String? {
+        val element = this[key] ?: return null
         return element.asString()
     }
 
