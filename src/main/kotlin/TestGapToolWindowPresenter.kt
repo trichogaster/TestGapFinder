@@ -10,7 +10,8 @@ object TestGapToolWindowPresenter {
         methodName: String,
         methodSignature: String,
         methodBodyText: String,
-        matchedTestClassName: String?
+        matchedTestClassName: String?,
+        extractedTestMethods: List<TestGapTestMethodInfo>
     ) {
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(TestGapToolWindowPanel.TOOL_WINDOW_ID)
             ?: return
@@ -27,7 +28,8 @@ object TestGapToolWindowPresenter {
                 methodName = methodName,
                 methodSignature = methodSignature,
                 methodBodyText = methodBodyText,
-                matchedTestClassName = matchedTestClassName
+                matchedTestClassName = matchedTestClassName,
+                extractedTestMethods = extractedTestMethods
             )
         )
 
@@ -40,7 +42,8 @@ object TestGapToolWindowPresenter {
         methodName: String,
         methodSignature: String,
         methodBodyText: String,
-        matchedTestClassName: String?
+        matchedTestClassName: String?,
+        extractedTestMethods: List<TestGapTestMethodInfo>
     ): String {
         val bodyPreview = methodBodyText.take(240)
         val truncatedSuffix = if (methodBodyText.length > 240) "..." else ""
@@ -49,6 +52,10 @@ object TestGapToolWindowPresenter {
         } else {
             MyMessageBundle.message("toolWindow.mock.testClassMissing")
         }
+        val existingTestMethodsBlock = buildExistingTestMethodsBlock(
+            matchedTestClassName = matchedTestClassName,
+            extractedTestMethods = extractedTestMethods
+        )
 
         return """
             ${MyMessageBundle.message("toolWindow.mock.section.methodSummary")}
@@ -57,6 +64,9 @@ object TestGapToolWindowPresenter {
             - Signature: $methodSignature
             - Body preview: $bodyPreview$truncatedSuffix
             - $testContextLine
+
+            ${MyMessageBundle.message("toolWindow.mock.section.existingTests")}
+            $existingTestMethodsBlock
             
             ${MyMessageBundle.message("toolWindow.mock.section.suggestedScenarios")}
             - Happy path with valid inputs
@@ -70,5 +80,29 @@ object TestGapToolWindowPresenter {
             - Should propagate dependency timeout as domain exception
         """.trimIndent()
     }
+
+    private fun buildExistingTestMethodsBlock(
+        matchedTestClassName: String?,
+        extractedTestMethods: List<TestGapTestMethodInfo>
+    ): String {
+        if (matchedTestClassName == null) {
+            return "- ${MyMessageBundle.message("toolWindow.mock.testMethods.notAvailable")}"
+        }
+
+        if (extractedTestMethods.isEmpty()) {
+            return "- ${MyMessageBundle.message("toolWindow.mock.testMethods.noneInMatchedClass")}"
+        }
+
+        return extractedTestMethods.joinToString("\n") { testMethod ->
+            val displayName = testMethod.displayName
+            if (displayName.isNullOrBlank()) {
+                "- ${testMethod.methodName}"
+            } else {
+                "- ${testMethod.methodName} (${MyMessageBundle.message("toolWindow.mock.displayNameLabel")}: $displayName)"
+            }
+        }
+    }
 }
+
+
 

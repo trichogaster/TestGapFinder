@@ -12,9 +12,12 @@ object TestGapMethodPresentation {
         val methodName = method.name
         val methodSignature = buildMethodSignature(method)
         val methodBodyText = method.body?.text ?: "<no-body>"
-        val matchedTestClassName = containingClass
+        val matchedTestClass = containingClass
             ?.let { TestGapTestClassFinder.findMatchingTestClass(project, it) }
-            ?.let { it.qualifiedName ?: it.name }
+        val matchedTestClassName = matchedTestClass?.let { it.qualifiedName ?: it.name }
+        val extractedTestMethods = matchedTestClass
+            ?.let { TestGapTestClassFinder.extractTestMethods(it) }
+            .orEmpty()
 
         TestGapToolWindowPresenter.showMockResult(
             project = project,
@@ -22,7 +25,8 @@ object TestGapMethodPresentation {
             methodName = methodName,
             methodSignature = methodSignature,
             methodBodyText = methodBodyText,
-            matchedTestClassName = matchedTestClassName
+            matchedTestClassName = matchedTestClassName,
+            extractedTestMethods = extractedTestMethods
         )
     }
 
