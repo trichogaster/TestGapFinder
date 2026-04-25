@@ -16,7 +16,7 @@ class TestGapResultsPanel : JPanel(BorderLayout()) {
         outputArea.isEditable = false
         outputArea.lineWrap = true
         outputArea.wrapStyleWord = true
-        outputArea.text = TestGapBundle.message("toolWindow.mock.placeholder")
+        outputArea.text = TestGapBundle.message("toolWindow.analysis.status.ready")
 
         add(JBScrollPane(outputArea), BorderLayout.CENTER)
     }

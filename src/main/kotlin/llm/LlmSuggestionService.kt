@@ -1,5 +1,6 @@
 package io.github.trichogaster.llm
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import io.github.trichogaster.analysis.MethodLlmInput
 import io.github.trichogaster.settings.LlmSettingsState
@@ -14,13 +15,13 @@ class LlmSuggestionService(
         return state.apiBaseUrl.isNotBlank() && state.apiKey.isNotBlank() && state.modelName.isNotBlank()
     }
 
-    fun suggestTestScenarios(input: MethodLlmInput): String {
+    fun suggestTestScenarios(input: MethodLlmInput): LlmAnalysisResult {
         val state = settingsState.state
         require(canCallModel()) {
             "LLM settings are incomplete. Configure API Base URL, API Key, and Model Name."
         }
 
-        return llmClient.suggestTestScenarios(
+        val rawResponse = llmClient.suggestTestScenarios(
             input = input,
             config = LlmRequestConfig(
                 apiBaseUrl = state.apiBaseUrl,
@@ -28,6 +29,14 @@ class LlmSuggestionService(
                 modelName = state.modelName
             )
         )
+
+        return LlmResponseParser.parseFromChatCompletionsResponse(rawResponse)
+    }
+
+    companion object {
+        fun getInstance(): LlmSuggestionService {
+            return ApplicationManager.getApplication().getService(LlmSuggestionService::class.java)
+        }
     }
 }
 

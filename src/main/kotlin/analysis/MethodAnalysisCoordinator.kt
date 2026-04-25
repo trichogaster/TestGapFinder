@@ -1,8 +1,10 @@
 package io.github.trichogaster.analysis
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiMethod
 import io.github.trichogaster.discovery.TestDiscoveryService
+import io.github.trichogaster.llm.LlmSuggestionService
 import io.github.trichogaster.ui.toolwindow.TestGapResultsPresenter
 
 object MethodAnalysisCoordinator {
@@ -28,13 +30,49 @@ object MethodAnalysisCoordinator {
             testNames = extractedTestMethods.map { it.methodName },
             extractedSignals = MethodSignalExtractor.extractSignals(method)
         )
+        val llmSuggestionService = LlmSuggestionService.getInstance()
 
-        TestGapResultsPresenter.showMockResult(
-            project = project,
-            llmInput = llmInput,
-            matchedTestClassName = matchedTestClassName,
-            extractedTestMethods = extractedTestMethods
-        )
+        if (!llmSuggestionService.canCallModel()) {
+            TestGapResultsPresenter.showStatus(
+                project,
+                "LLM settings are incomplete. Open Settings > Tools > Test Gap Finder and configure API Base URL, API Key, and Model Name."
+            )
+
+            return
+        }
+
+        TestGapResultsPresenter.showStatus(project, "Running LLM analysis...")
+
+        ApplicationManager.getApplication().executeOnPooledThread {
+            try {
+                val analysisResult = llmSuggestionService.suggestTestScenarios(llmInput)
+
+                ApplicationManager.getApplication().invokeLater {
+                    if (project.isDisposed) {
+                        return@invokeLater
+                    }
+
+                    TestGapResultsPresenter.showAnalysisResult(
+                        project = project,
+                        llmInput = llmInput,
+                        matchedTestClassName = matchedTestClassName,
+                        extractedTestMethods = extractedTestMethods,
+                        analysisResult = analysisResult
+                    )
+                }
+            } catch (t: Throwable) {
+                ApplicationManager.getApplication().invokeLater {
+                    if (project.isDisposed) {
+                        return@invokeLater
+                    }
+
+                    TestGapResultsPresenter.showStatus(
+                        project,
+                        "LLM analysis failed: ${t.message ?: t.javaClass.simpleName}"
+                    )
+                }
+            }
+        }
     }
 
     private fun buildMethodSignature(method: PsiMethod): String {
