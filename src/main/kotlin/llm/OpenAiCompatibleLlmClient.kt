@@ -71,31 +71,19 @@ class OpenAiCompatibleLlmClient(
             - Assess heuristically.
             - Existing tests are represented only by names, not bodies.
             - Return strict JSON only.
-            - Use exactly the allowed enum values.
+            - Use exactly these categories: happy_path, boundary, invalid_input, exception_path, edge_case.
+            - Use exactly these coverage labels: likely_covered, possibly_covered, likely_missing.
+            - Use exactly these priorities: high, medium, low.
 
             REQUIRED JSON SCHEMA:
-            {
-              "method_summary": "string",
-              "important_behaviors": ["string"],
-              "suggested_scenarios": [
-                {
-                  "scenario": "string",
-                  "category": "happy_path|edge_case|invalid_input|exception_path|state_transition",
-                  "priority": "high|medium|low",
-                  "rationale": "string"
-                }
-              ],
-              "coverage_assessment": {
-                "likely_covered": ["string"],
-                "possibly_covered": ["string"],
-                "likely_missing": ["string"]
-              }
-            }
+            ${LlmOutputContract.requiredJsonSchema()}
 
             COVERAGE GUIDANCE:
             - Decide likely_covered / possibly_covered / likely_missing by matching scenario intent with existing test names only.
             - If evidence is weak, prefer possibly_covered.
             - If no matching test name intent is visible, use likely_missing.
+            - For each coverage item, include matchedTests as test names that support the heuristic assessment.
+            - If no test name supports an item, matchedTests should be an empty array.
 
             className: ${input.className}
             methodName: ${input.methodName}
