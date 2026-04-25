@@ -1,9 +1,11 @@
-package io.github.trichogaster
+package io.github.trichogaster.analysis
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiMethod
+import io.github.trichogaster.discovery.TestDiscoveryService
+import io.github.trichogaster.ui.toolwindow.TestGapResultsPresenter
 
-object TestGapMethodPresentation {
+object MethodAnalysisCoordinator {
     fun showExtractedMethodInfo(project: Project, method: PsiMethod) {
         val containingClass = method.containingClass
         val className = method.containingClass?.qualifiedName
@@ -13,13 +15,13 @@ object TestGapMethodPresentation {
         val methodSignature = buildMethodSignature(method)
         val methodBodyText = method.body?.text ?: "<no-body>"
         val matchedTestClass = containingClass
-            ?.let { TestGapTestClassFinder.findMatchingTestClass(project, it) }
+            ?.let { TestDiscoveryService.findMatchingTestClass(project, it) }
         val matchedTestClassName = matchedTestClass?.let { it.qualifiedName ?: it.name }
         val extractedTestMethods = matchedTestClass
-            ?.let { TestGapTestClassFinder.extractTestMethods(it) }
+            ?.let { TestDiscoveryService.extractTestMethods(it) }
             .orEmpty()
 
-        TestGapToolWindowPresenter.showMockResult(
+        TestGapResultsPresenter.showMockResult(
             project = project,
             className = className,
             methodName = methodName,
@@ -40,4 +42,5 @@ object TestGapMethodPresentation {
             .joinToString(" ")
     }
 }
+
 

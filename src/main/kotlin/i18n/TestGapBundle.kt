@@ -1,14 +1,14 @@
-package io.github.trichogaster
+package io.github.trichogaster.i18n
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.PropertyKey
 import java.util.function.Supplier
 
-private const val BUNDLE = "messages.MyMessageBundle"
+private const val BUNDLE = "messages.TestGapBundle"
 
-internal object MyMessageBundle {
-    private val instance = DynamicBundle(MyMessageBundle::class.java, BUNDLE)
+internal object TestGapBundle {
+    private val instance = DynamicBundle(TestGapBundle::class.java, BUNDLE)
 
     @JvmStatic
     @Nls

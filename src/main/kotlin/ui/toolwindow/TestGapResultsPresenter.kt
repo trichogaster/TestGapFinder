@@ -1,9 +1,11 @@
-package io.github.trichogaster
+package io.github.trichogaster.ui.toolwindow
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
+import io.github.trichogaster.discovery.TestMethodDescriptor
+import io.github.trichogaster.i18n.TestGapBundle
 
-object TestGapToolWindowPresenter {
+object TestGapResultsPresenter {
     fun showMockResult(
         project: Project,
         className: String,
@@ -11,14 +13,14 @@ object TestGapToolWindowPresenter {
         methodSignature: String,
         methodBodyText: String,
         matchedTestClassName: String?,
-        extractedTestMethods: List<TestGapTestMethodInfo>
+        extractedTestMethods: List<TestMethodDescriptor>
     ) {
-        val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(TestGapToolWindowPanel.TOOL_WINDOW_ID)
+        val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(TestGapResultsPanel.TOOL_WINDOW_ID)
             ?: return
 
         val panel = toolWindow.contentManager.contents
             .asSequence()
-            .mapNotNull { it.component as? TestGapToolWindowPanel }
+            .mapNotNull { it.component as? TestGapResultsPanel }
             .firstOrNull()
             ?: return
 
@@ -43,14 +45,14 @@ object TestGapToolWindowPresenter {
         methodSignature: String,
         methodBodyText: String,
         matchedTestClassName: String?,
-        extractedTestMethods: List<TestGapTestMethodInfo>
+        extractedTestMethods: List<TestMethodDescriptor>
     ): String {
         val bodyPreview = methodBodyText.take(240)
         val truncatedSuffix = if (methodBodyText.length > 240) "..." else ""
         val testContextLine = if (matchedTestClassName != null) {
-            MyMessageBundle.message("toolWindow.mock.testClassFound", matchedTestClassName)
+            TestGapBundle.message("toolWindow.mock.testClassFound", matchedTestClassName)
         } else {
-            MyMessageBundle.message("toolWindow.mock.testClassMissing")
+            TestGapBundle.message("toolWindow.mock.testClassMissing")
         }
         val existingTestMethodsBlock = buildExistingTestMethodsBlock(
             matchedTestClassName = matchedTestClassName,
@@ -58,23 +60,23 @@ object TestGapToolWindowPresenter {
         )
 
         return """
-            ${MyMessageBundle.message("toolWindow.mock.section.methodSummary")}
+            ${TestGapBundle.message("toolWindow.mock.section.methodSummary")}
             - Class: $className
             - Method: $methodName
             - Signature: $methodSignature
             - Body preview: $bodyPreview$truncatedSuffix
             - $testContextLine
 
-            ${MyMessageBundle.message("toolWindow.mock.section.existingTests")}
+            ${TestGapBundle.message("toolWindow.mock.section.existingTests")}
             $existingTestMethodsBlock
             
-            ${MyMessageBundle.message("toolWindow.mock.section.suggestedScenarios")}
+            ${TestGapBundle.message("toolWindow.mock.section.suggestedScenarios")}
             - Happy path with valid inputs
             - Edge case: empty or minimal input values
             - Invalid input should fail fast with clear error
             - Exception path from dependency failure
             
-            ${MyMessageBundle.message("toolWindow.mock.section.likelyMissingTests")}
+            ${TestGapBundle.message("toolWindow.mock.section.likelyMissingTests")}
             - Should reject null input with IllegalArgumentException
             - Should handle boundary value at min/max limits
             - Should propagate dependency timeout as domain exception
@@ -83,14 +85,14 @@ object TestGapToolWindowPresenter {
 
     private fun buildExistingTestMethodsBlock(
         matchedTestClassName: String?,
-        extractedTestMethods: List<TestGapTestMethodInfo>
+        extractedTestMethods: List<TestMethodDescriptor>
     ): String {
         if (matchedTestClassName == null) {
-            return "- ${MyMessageBundle.message("toolWindow.mock.testMethods.notAvailable")}"
+            return "- ${TestGapBundle.message("toolWindow.mock.testMethods.notAvailable")}"
         }
 
         if (extractedTestMethods.isEmpty()) {
-            return "- ${MyMessageBundle.message("toolWindow.mock.testMethods.noneInMatchedClass")}"
+            return "- ${TestGapBundle.message("toolWindow.mock.testMethods.noneInMatchedClass")}"
         }
 
         return extractedTestMethods.joinToString("\n") { testMethod ->
@@ -98,11 +100,12 @@ object TestGapToolWindowPresenter {
             if (displayName.isNullOrBlank()) {
                 "- ${testMethod.methodName}"
             } else {
-                "- ${testMethod.methodName} (${MyMessageBundle.message("toolWindow.mock.displayNameLabel")}: $displayName)"
+                "- ${testMethod.methodName} (${TestGapBundle.message("toolWindow.mock.displayNameLabel")}: $displayName)"
             }
         }
     }
 }
+
 
 
 

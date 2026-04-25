@@ -1,4 +1,4 @@
-package io.github.trichogaster
+package io.github.trichogaster.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -8,13 +8,15 @@ import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
+import io.github.trichogaster.analysis.MethodAnalysisCoordinator
+import io.github.trichogaster.i18n.TestGapBundle
 
-class FindLikelyTestGapsAction : AnAction() {
+class FindTestGapsAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: run {
             Messages.showErrorDialog(
-                MyMessageBundle.message("action.findLikelyTestGaps.error.notInJavaMethod"),
-                MyMessageBundle.message("action.findLikelyTestGaps.title")
+                TestGapBundle.message("action.findLikelyTestGaps.error.notInJavaMethod"),
+                TestGapBundle.message("action.findLikelyTestGaps.title")
             )
             return
         }
@@ -25,13 +27,13 @@ class FindLikelyTestGapsAction : AnAction() {
         if (method == null) {
             Messages.showErrorDialog(
                 project,
-                MyMessageBundle.message("action.findLikelyTestGaps.error.notInJavaMethod"),
-                MyMessageBundle.message("action.findLikelyTestGaps.title")
+                TestGapBundle.message("action.findLikelyTestGaps.error.notInJavaMethod"),
+                TestGapBundle.message("action.findLikelyTestGaps.title")
             )
             return
         }
 
-        TestGapMethodPresentation.showExtractedMethodInfo(project, method)
+        MethodAnalysisCoordinator.showExtractedMethodInfo(project, method)
     }
 
     private fun resolveMethodFromElement(element: PsiElement?): PsiMethod? {
@@ -47,4 +49,5 @@ class FindLikelyTestGapsAction : AnAction() {
     }
 
 }
+
 

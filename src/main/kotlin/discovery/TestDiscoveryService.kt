@@ -1,4 +1,4 @@
-package io.github.trichogaster
+package io.github.trichogaster.discovery
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
@@ -11,7 +11,7 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
 
-object TestGapTestClassFinder {
+object TestDiscoveryService {
     fun findMatchingTestClass(project: Project, productionClass: PsiClass): PsiClass? {
         val productionClassName = productionClass.name ?: return null
         val expectedTestClassNames = listOf(
@@ -48,13 +48,13 @@ object TestGapTestClassFinder {
         return null
     }
 
-    fun extractTestMethods(testClass: PsiClass): List<TestGapTestMethodInfo> {
+    fun extractTestMethods(testClass: PsiClass): List<TestMethodDescriptor> {
         return testClass.methods.mapNotNull { method ->
             if (!isTestMethod(method)) {
                 return@mapNotNull null
             }
 
-            TestGapTestMethodInfo(
+            TestMethodDescriptor(
                 methodName = method.name,
                 displayName = extractDisplayName(method)
             )
@@ -91,4 +91,5 @@ object TestGapTestClassFinder {
         return literalExpression.value as? String ?: value.text
     }
 }
+
 

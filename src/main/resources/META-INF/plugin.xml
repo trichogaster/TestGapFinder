@@ -12,23 +12,23 @@
     <depends>com.intellij.modules.json</depends>
     <depends>com.intellij.properties</depends>
 
-    <resource-bundle>messages.MyMessageBundle</resource-bundle>
+    <resource-bundle>messages.TestGapBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider
                 language="JAVA"
-                implementationClass="io.github.trichogaster.TestGapMethodLineMarkerProvider"/>
+                implementationClass="io.github.trichogaster.gutter.MethodTestGapLineMarkerProvider"/>
         <toolWindow
                 id="Test Gap Finder"
                 anchor="right"
-                factoryClass="io.github.trichogaster.TestGapToolWindowFactory"
+                factoryClass="io.github.trichogaster.ui.toolwindow.TestGapResultsToolWindowFactory"
                 canCloseContents="false"/>
     </extensions>
 
     <actions>
         <action
                 id="io.github.trichogaster.FindLikelyTestGapsAction"
-                class="io.github.trichogaster.FindLikelyTestGapsAction"
+                class="io.github.trichogaster.actions.FindTestGapsAction"
                 text="Find Likely Test Gaps"
                 description="Analyze selected code and suggest likely missing test scenarios">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>

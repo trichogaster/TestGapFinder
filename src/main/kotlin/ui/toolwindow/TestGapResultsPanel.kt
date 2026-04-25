@@ -1,12 +1,13 @@
-package io.github.trichogaster
+package io.github.trichogaster.ui.toolwindow
 
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
+import io.github.trichogaster.i18n.TestGapBundle
 import java.awt.BorderLayout
 import javax.swing.JPanel
 
-class TestGapToolWindowPanel : JPanel(BorderLayout()) {
+class TestGapResultsPanel : JPanel(BorderLayout()) {
     private val outputArea = JBTextArea()
 
     init {
@@ -15,7 +16,7 @@ class TestGapToolWindowPanel : JPanel(BorderLayout()) {
         outputArea.isEditable = false
         outputArea.lineWrap = true
         outputArea.wrapStyleWord = true
-        outputArea.text = MyMessageBundle.message("toolWindow.mock.placeholder")
+        outputArea.text = TestGapBundle.message("toolWindow.mock.placeholder")
 
         add(JBScrollPane(outputArea), BorderLayout.CENTER)
     }
@@ -29,5 +30,6 @@ class TestGapToolWindowPanel : JPanel(BorderLayout()) {
         const val TOOL_WINDOW_ID = "Test Gap Finder"
     }
 }
+
 
 
