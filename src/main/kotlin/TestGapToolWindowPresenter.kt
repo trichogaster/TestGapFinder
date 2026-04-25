@@ -9,7 +9,8 @@ object TestGapToolWindowPresenter {
         className: String,
         methodName: String,
         methodSignature: String,
-        methodBodyText: String
+        methodBodyText: String,
+        matchedTestClassName: String?
     ) {
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(TestGapToolWindowPanel.TOOL_WINDOW_ID)
             ?: return
@@ -25,7 +26,8 @@ object TestGapToolWindowPresenter {
                 className = className,
                 methodName = methodName,
                 methodSignature = methodSignature,
-                methodBodyText = methodBodyText
+                methodBodyText = methodBodyText,
+                matchedTestClassName = matchedTestClassName
             )
         )
 
@@ -37,10 +39,16 @@ object TestGapToolWindowPresenter {
         className: String,
         methodName: String,
         methodSignature: String,
-        methodBodyText: String
+        methodBodyText: String,
+        matchedTestClassName: String?
     ): String {
         val bodyPreview = methodBodyText.take(240)
         val truncatedSuffix = if (methodBodyText.length > 240) "..." else ""
+        val testContextLine = if (matchedTestClassName != null) {
+            MyMessageBundle.message("toolWindow.mock.testClassFound", matchedTestClassName)
+        } else {
+            MyMessageBundle.message("toolWindow.mock.testClassMissing")
+        }
 
         return """
             ${MyMessageBundle.message("toolWindow.mock.section.methodSummary")}
@@ -48,6 +56,7 @@ object TestGapToolWindowPresenter {
             - Method: $methodName
             - Signature: $methodSignature
             - Body preview: $bodyPreview$truncatedSuffix
+            - $testContextLine
             
             ${MyMessageBundle.message("toolWindow.mock.section.suggestedScenarios")}
             - Happy path with valid inputs

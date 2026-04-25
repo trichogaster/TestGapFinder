@@ -5,19 +5,24 @@ import com.intellij.psi.PsiMethod
 
 object TestGapMethodPresentation {
     fun showExtractedMethodInfo(project: Project, method: PsiMethod) {
+        val containingClass = method.containingClass
         val className = method.containingClass?.qualifiedName
             ?: method.containingClass?.name
             ?: "<unknown-class>"
         val methodName = method.name
         val methodSignature = buildMethodSignature(method)
         val methodBodyText = method.body?.text ?: "<no-body>"
+        val matchedTestClassName = containingClass
+            ?.let { TestGapTestClassFinder.findMatchingTestClass(project, it) }
+            ?.let { it.qualifiedName ?: it.name }
 
         TestGapToolWindowPresenter.showMockResult(
             project = project,
             className = className,
             methodName = methodName,
             methodSignature = methodSignature,
-            methodBodyText = methodBodyText
+            methodBodyText = methodBodyText,
+            matchedTestClassName = matchedTestClassName
         )
     }
 
