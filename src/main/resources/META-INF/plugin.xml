@@ -18,6 +18,11 @@
         <codeInsight.lineMarkerProvider
                 language="JAVA"
                 implementationClass="io.github.trichogaster.TestGapMethodLineMarkerProvider"/>
+        <toolWindow
+                id="Test Gap Finder"
+                anchor="right"
+                factoryClass="io.github.trichogaster.TestGapToolWindowFactory"
+                canCloseContents="false"/>
     </extensions>
 
     <actions>

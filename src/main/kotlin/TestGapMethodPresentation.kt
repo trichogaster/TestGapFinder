@@ -11,6 +11,14 @@ object TestGapMethodPresentation {
         val methodName = method.name
         val methodSignature = buildMethodSignature(method)
         val methodBodyText = method.body?.text ?: "<no-body>"
+
+        TestGapToolWindowPresenter.showMockResult(
+            project = project,
+            className = className,
+            methodName = methodName,
+            methodSignature = methodSignature,
+            methodBodyText = methodBodyText
+        )
     }
 
     private fun buildMethodSignature(method: PsiMethod): String {
