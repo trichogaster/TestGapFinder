@@ -2,16 +2,14 @@ package io.github.trichogaster.ui.toolwindow
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
+import io.github.trichogaster.analysis.MethodLlmInput
 import io.github.trichogaster.discovery.TestMethodDescriptor
 import io.github.trichogaster.i18n.TestGapBundle
 
 object TestGapResultsPresenter {
     fun showMockResult(
         project: Project,
-        className: String,
-        methodName: String,
-        methodSignature: String,
-        methodBodyText: String,
+        llmInput: MethodLlmInput,
         matchedTestClassName: String?,
         extractedTestMethods: List<TestMethodDescriptor>
     ) {
@@ -26,10 +24,7 @@ object TestGapResultsPresenter {
 
         panel.render(
             buildMockOutput(
-                className = className,
-                methodName = methodName,
-                methodSignature = methodSignature,
-                methodBodyText = methodBodyText,
+                llmInput = llmInput,
                 matchedTestClassName = matchedTestClassName,
                 extractedTestMethods = extractedTestMethods
             )
@@ -40,15 +35,12 @@ object TestGapResultsPresenter {
     }
 
     private fun buildMockOutput(
-        className: String,
-        methodName: String,
-        methodSignature: String,
-        methodBodyText: String,
+        llmInput: MethodLlmInput,
         matchedTestClassName: String?,
         extractedTestMethods: List<TestMethodDescriptor>
     ): String {
-        val bodyPreview = methodBodyText.take(240)
-        val truncatedSuffix = if (methodBodyText.length > 240) "..." else ""
+        val bodyPreview = llmInput.methodCode.take(240)
+        val truncatedSuffix = if (llmInput.methodCode.length > 240) "..." else ""
         val testContextLine = if (matchedTestClassName != null) {
             TestGapBundle.message("toolWindow.mock.testClassFound", matchedTestClassName)
         } else {
@@ -58,17 +50,35 @@ object TestGapResultsPresenter {
             matchedTestClassName = matchedTestClassName,
             extractedTestMethods = extractedTestMethods
         )
+        val llmTestNamesBlock = buildSimpleListBlock(
+            values = llmInput.testNames,
+            emptyMessageKey = "toolWindow.mock.llmInput.noTestNames"
+        )
+        val llmSignalsBlock = buildSimpleListBlock(
+            values = llmInput.extractedSignals,
+            emptyMessageKey = "toolWindow.mock.llmInput.noSignals"
+        )
 
         return """
             ${TestGapBundle.message("toolWindow.mock.section.methodSummary")}
-            - Class: $className
-            - Method: $methodName
-            - Signature: $methodSignature
+            - Class: ${llmInput.className}
+            - Method: ${llmInput.methodName}
+            - Signature: ${llmInput.methodSignature}
             - Body preview: $bodyPreview$truncatedSuffix
             - $testContextLine
 
             ${TestGapBundle.message("toolWindow.mock.section.existingTests")}
             $existingTestMethodsBlock
+
+            ${TestGapBundle.message("toolWindow.mock.section.llmInput")}
+            - ${TestGapBundle.message("toolWindow.mock.llmInput.className")}: ${llmInput.className}
+            - ${TestGapBundle.message("toolWindow.mock.llmInput.methodName")}: ${llmInput.methodName}
+            - ${TestGapBundle.message("toolWindow.mock.llmInput.methodSignature")}: ${llmInput.methodSignature}
+            - ${TestGapBundle.message("toolWindow.mock.llmInput.methodCodeLength")}: ${llmInput.methodCode.length}
+            - ${TestGapBundle.message("toolWindow.mock.llmInput.testNames")}
+$llmTestNamesBlock
+            - ${TestGapBundle.message("toolWindow.mock.llmInput.extractedSignals")}
+$llmSignalsBlock
             
             ${TestGapBundle.message("toolWindow.mock.section.suggestedScenarios")}
             - Happy path with valid inputs
@@ -103,6 +113,14 @@ object TestGapResultsPresenter {
                 "- ${testMethod.methodName} (${TestGapBundle.message("toolWindow.mock.displayNameLabel")}: $displayName)"
             }
         }
+    }
+
+    private fun buildSimpleListBlock(values: List<String>, emptyMessageKey: String): String {
+        if (values.isEmpty()) {
+            return "  - ${TestGapBundle.message(emptyMessageKey)}"
+        }
+
+        return values.joinToString("\n") { "  - $it" }
     }
 }
 

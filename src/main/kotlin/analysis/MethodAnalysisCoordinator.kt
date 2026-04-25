@@ -20,13 +20,18 @@ object MethodAnalysisCoordinator {
         val extractedTestMethods = matchedTestClass
             ?.let { TestDiscoveryService.extractTestMethods(it) }
             .orEmpty()
-
-        TestGapResultsPresenter.showMockResult(
-            project = project,
+        val llmInput = MethodLlmInput(
             className = className,
             methodName = methodName,
             methodSignature = methodSignature,
-            methodBodyText = methodBodyText,
+            methodCode = methodBodyText,
+            testNames = extractedTestMethods.map { it.methodName },
+            extractedSignals = MethodSignalExtractor.extractSignals(method)
+        )
+
+        TestGapResultsPresenter.showMockResult(
+            project = project,
+            llmInput = llmInput,
             matchedTestClassName = matchedTestClassName,
             extractedTestMethods = extractedTestMethods
         )
